@@ -123,7 +123,25 @@ function mundosmart_ensure_sobre_footer_link() {
 	}
 }
 
+function mundosmart_is_sobre_menu_item( $item, $page_id ) {
+	$title = html_entity_decode( wp_strip_all_tags( (string) $item->title ), ENT_QUOTES, 'UTF-8' );
+	$title = trim( preg_replace( '/\s+/u', ' ', $title ) );
+	if ( 0 === strcasecmp( $title, 'Sobre nós' ) || 0 === strcasecmp( $title, 'Sobre nos' ) ) {
+		return true;
+	}
+	if ( $page_id && (int) $item->object_id === (int) $page_id ) {
+		return true;
+	}
+	return false !== stripos( (string) $item->url, '/sobre-nos' );
+}
+
 function mundosmart_ensure_sobre_menu_item() {
+	static $done = false;
+	if ( $done ) {
+		return;
+	}
+	$done = true;
+
 	$page = get_page_by_path( 'sobre-nos' );
 	if ( ! $page ) {
 		return;
@@ -137,17 +155,32 @@ function mundosmart_ensure_sobre_menu_item() {
 		if ( ! $items ) {
 			continue;
 		}
-		$has      = false;
+		$matches  = array();
 		$position = 2;
 		foreach ( $items as $item ) {
-			if ( (int) $item->object_id === (int) $page->ID || false !== stripos( (string) $item->url, '/sobre-nos' ) ) {
-				$has = true;
+			if ( mundosmart_is_sobre_menu_item( $item, $page->ID ) ) {
+				$matches[] = $item;
 			}
 			if ( 'Home' === $item->title ) {
 				$position = (int) $item->menu_order + 1;
 			}
 		}
-		if ( $has ) {
+		if ( $matches ) {
+			usort(
+				$matches,
+				static function ( $a, $b ) use ( $page ) {
+					$a_page = ( 'page' === $a->object && (int) $a->object_id === (int) $page->ID ) ? 0 : 1;
+					$b_page = ( 'page' === $b->object && (int) $b->object_id === (int) $page->ID ) ? 0 : 1;
+					if ( $a_page !== $b_page ) {
+						return $a_page - $b_page;
+					}
+					return (int) $a->ID - (int) $b->ID;
+				}
+			);
+			array_shift( $matches );
+			foreach ( $matches as $duplicate ) {
+				wp_delete_post( (int) $duplicate->ID, true );
+			}
 			continue;
 		}
 		$item_id = wp_update_nav_menu_item(
