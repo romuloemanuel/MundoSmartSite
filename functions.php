@@ -226,7 +226,7 @@ function mundosmart_enqueue_assets() {
 		'mundosmart-assistencia',
 		get_stylesheet_directory_uri() . '/assets/assistencia.css',
 		array(),
-		'2.8.12'
+		'2.8.13'
 	);
 	wp_enqueue_script(
 		'mundosmart-landing',
@@ -1176,22 +1176,30 @@ function mundosmart_brindes_markup() {
 	return ob_get_clean();
 }
 
+function mundosmart_company_logo_url() {
+	$theme = mundosmart_theme_midia_url( 'logo-mundo-smart.png' );
+	if ( $theme ) {
+		return $theme;
+	}
+	$path = get_stylesheet_directory() . '/assets/logo-mundo-smart.png';
+	if ( is_file( $path ) ) {
+		return get_stylesheet_directory_uri() . '/assets/logo-mundo-smart.png?v=' . (int) filemtime( $path );
+	}
+	return mundosmart_fallback_upload_url( content_url( 'uploads/2026/09/logo-mundo-smart.png' ) );
+}
+
 function mundosmart_sobre_markup() {
-	$whatsapp    = mundosmart_whatsapp_url( 'Olá! Quero falar com a Mundo Smart.' );
-	$loja        = home_url( '/loja/' );
-	$assistencia = home_url( '/assistencia-tecnica/' );
-	$brindes     = home_url( '/brindes/' );
-	$fachada     = mundosmart_hero_video_or_image( 'home_fachada', 'home_fachada_video', 'home_fachada_capa' );
-	$hero        = $fachada['src'] ? $fachada['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
+	$whatsapp = mundosmart_whatsapp_url( 'Olá! Quero falar com a Mundo Smart.' );
+	$logo     = mundosmart_company_logo_url();
 	ob_start();
 	?>
 	<main class="ms-landing ms-landing--sobre">
 		<section class="ms-hero">
 			<div class="ms-wrap ms-hero__grid">
 				<div>
-					<p class="ms-kicker">Mundo Smart · Centro de Mococa</p>
-					<h1>A loja de celular do centro de <span>Mococa</span>.</h1>
-					<p class="ms-lead">Assistência técnica, venda e troca de iPhone, e personalizados para presente e brinde — no mesmo endereço, em frente à Lojas Cem.</p>
+					<p class="ms-kicker">Mundo Smart · Mococa/SP</p>
+					<h1>Sobre <span>nós</span>.</h1>
+					<p class="ms-lead">Somos a loja de celular do centro de Mococa. Atendimento na Rua Quinze de Novembro, 398, em frente à Lojas Cem.</p>
 					<div class="ms-hero__actions">
 						<a class="ms-btn ms-btn--whatsapp ms-btn--lg" href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener">
 							<?php echo mundosmart_whatsapp_icon(); ?>
@@ -1201,23 +1209,15 @@ function mundosmart_sobre_markup() {
 					</div>
 				</div>
 				<div class="ms-logo-panel ms-sobre-panel">
-					<img src="<?php echo esc_url( $hero ); ?>" alt="Fachada da Mundo Smart no centro de Mococa" width="800" height="600">
+					<img src="<?php echo esc_url( $logo ); ?>" alt="Logo da Mundo Smart" width="640" height="360">
 				</div>
-			</div>
-		</section>
-
-		<section class="ms-wrap">
-			<div class="ms-proof ms-proof--3">
-				<article><b>Assistência técnica</b><span>iPhone e Android. Tela, bateria e reparo avançado, com análise antes do serviço.</span></article>
-				<article><b>Venda e troca</b><span>iPhone na loja, no centro. Combinamos pelo WhatsApp.</span></article>
-				<article><b>Presente e brinde</b><span>Copos térmicos, capinhas e chaveiros com nome, logo ou arte.</span></article>
 			</div>
 		</section>
 
 		<section class="ms-section">
 			<div class="ms-wrap">
 				<h2>Quem <span>somos</span></h2>
-				<p class="ms-section__intro">A Mundo Smart é a loja de celular da Rua Quinze de Novembro. Quem chega aqui encontra conserto, aparelho e personalizado no mesmo lugar — sem mandar o cliente de um lado para o outro.</p>
+				<p class="ms-section__intro">A Mundo Smart é uma loja de celular no centro de Mococa. Trabalhamos aqui, no mesmo endereço, com atendimento na loja e pelo WhatsApp.</p>
 				<div class="ms-about-facts">
 					<article>
 						<b>Endereço</b>
@@ -1237,36 +1237,10 @@ function mundosmart_sobre_markup() {
 
 		<section class="ms-section">
 			<div class="ms-wrap">
-				<h2>O que você encontra <span>aqui</span></h2>
-				<div class="ms-paths">
-					<a class="ms-path" href="<?php echo esc_url( $assistencia ); ?>">
-						<span class="ms-card__tag">Consertar</span>
-						<h3>Assistência técnica</h3>
-						<p>Tela e bateria em até 2 horas, quando a peça está em estoque. Garantia de 6 meses no serviço.</p>
-					</a>
-					<a class="ms-path ms-path--iphone" href="<?php echo esc_url( mundosmart_whatsapp_url( 'Olá! Quero comprar ou trocar um iPhone.' ) ); ?>" target="_blank" rel="noopener">
-						<span class="ms-card__tag">iPhone</span>
-						<h3>Comprar ou trocar</h3>
-						<p>Venda e troca de iPhone na loja.</p>
-					</a>
-					<a class="ms-path ms-path--shop" href="<?php echo esc_url( $brindes ); ?>">
-						<span class="ms-card__tag">Loja</span>
-						<h3>Presente e brinde</h3>
-						<p>Copos, capinhas e chaveiros personalizáveis.</p>
-					</a>
-				</div>
-				<p class="ms-loja-note">Acessórios para celular também estão na <a href="<?php echo esc_url( $loja ); ?>">loja</a>.</p>
-			</div>
-		</section>
-
-		<?php echo mundosmart_reviews_markup( 6 ); ?>
-
-		<section class="ms-section">
-			<div class="ms-wrap">
 				<div class="ms-cta">
 					<div>
-						<h2>Passa na <span>loja</span></h2>
-						<p>Rua Quinze de Novembro, 398. Ou chama no WhatsApp que a gente te atende.</p>
+						<h2>Fala com a <span>gente</span></h2>
+						<p>Rua Quinze de Novembro, 398. Ou chama no WhatsApp.</p>
 					</div>
 					<a class="ms-btn ms-btn--whatsapp ms-btn--lg" href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener">
 						<?php echo mundosmart_whatsapp_icon(); ?>

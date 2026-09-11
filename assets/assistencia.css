@@ -641,9 +641,21 @@ html.ms-zoom-open body {
 	mix-blend-mode: normal;
 }
 
+.ms-landing--sobre .ms-sobre-panel {
+	background: #070b14;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 32px;
+}
+
 .ms-landing--sobre .ms-sobre-panel img {
-	height: 420px;
-	object-fit: cover;
+	width: auto;
+	max-width: 82%;
+	height: auto;
+	max-height: 260px;
+	object-fit: contain;
+	object-position: center;
 }
 
 .ms-about-facts {
@@ -1650,6 +1662,18 @@ img.custom-logo {
 		height: auto !important;
 		max-height: 220px;
 		object-fit: cover;
+	}
+
+	.ms-landing--sobre .ms-sobre-panel {
+		min-height: 220px;
+		padding: 28px 20px;
+	}
+
+	.ms-landing--sobre .ms-sobre-panel img {
+		width: auto !important;
+		max-width: 78%;
+		max-height: 160px;
+		object-fit: contain;
 	}
 
 	.ms-logo-panel.ms-hero-rotator {
