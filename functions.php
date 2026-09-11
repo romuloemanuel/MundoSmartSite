@@ -1075,7 +1075,6 @@ function mundosmart_landing_markup( $context = 'home' ) {
 						</a>
 						<a class="ms-btn ms-btn--blue ms-btn--lg" href="<?php echo esc_url( $assistencia ); ?>">Ver assistência</a>
 						<a class="ms-btn ms-btn--ghost ms-btn--lg" href="<?php echo esc_url( $loja ); ?>">Ver a loja</a>
-						<a class="ms-btn ms-btn--ghost ms-btn--lg" href="<?php echo esc_url( mundosmart_sobre_url() ); ?>">Sobre nós</a>
 					</div>
 				</div>
 				<div class="ms-logo-panel ms-fachada ms-hero-rotator" data-ms-rotator data-ms-interval="5000" aria-roledescription="carrossel">
