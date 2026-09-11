@@ -696,9 +696,15 @@ html.ms-zoom-open body {
 	text-decoration: underline;
 }
 
+.ms-landing--sobre .ms-lead,
+.ms-landing--sobre .ms-about-facts p,
+.ms-landing--sobre .ms-cta p {
+	color: var(--ms-white);
+}
+
 .ms-about-story {
 	max-width: 62ch;
-	color: var(--ms-muted);
+	color: var(--ms-white);
 	font-size: 18px;
 	line-height: 1.7;
 }

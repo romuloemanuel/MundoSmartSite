@@ -370,7 +370,7 @@ function mundosmart_enqueue_assets() {
 		'mundosmart-assistencia',
 		get_stylesheet_directory_uri() . '/assets/assistencia.css',
 		array(),
-		'2.8.14'
+		'2.8.15'
 	);
 	wp_enqueue_script(
 		'mundosmart-landing',
