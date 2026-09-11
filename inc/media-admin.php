@@ -26,6 +26,7 @@ function mundosmart_media_defaults() {
 		'assistencia_avancados'        => array( 0, 0, 0 ),
 		'assistencia_avancados_capas'  => array( 0, 0, 0 ),
 		'brindes_hero'                 => 0,
+		'brindes_hero_capa'            => 0,
 		'brindes_galeria'              => array( 0, 0, 0, 0, 0, 0 ),
 	);
 }
@@ -393,13 +394,21 @@ function mundosmart_media_admin_page() {
 			<section class="ms-admin-card" id="ms-brindes">
 				<h2>Brindes</h2>
 				<div class="ms-admin-field">
-					<h3>Foto principal</h3>
-					<?php mundosmart_admin_single( 'brindes_hero', $media['brindes_hero'], 'image' ); ?>
+					<h3>Imagem principal</h3>
+					<p>Primeiro: um vídeo com foto de capa. Os trabalhos abaixo são só imagem.</p>
+					<div class="ms-admin-slots ms-admin-slots--videos">
+						<div class="ms-admin-video">
+							<div class="ms-admin-video__pair">
+								<?php mundosmart_admin_slot( 'mundosmart_media[brindes_hero]', $media['brindes_hero'], 'video', 'Escolher vídeo' ); ?>
+								<?php mundosmart_admin_slot( 'mundosmart_media[brindes_hero_capa]', $media['brindes_hero_capa'], 'image', 'Foto de capa' ); ?>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="ms-admin-field">
 					<h3>Alguns trabalhos</h3>
-					<p>Só esta galeria. Até 6 fotos ou vídeos.</p>
-					<?php mundosmart_admin_slots( 'brindes_galeria', $media['brindes_galeria'], 'media', 6 ); ?>
+					<p>Só esta galeria. Até 6 fotos.</p>
+					<?php mundosmart_admin_slots( 'brindes_galeria', $media['brindes_galeria'], 'image', 6 ); ?>
 				</div>
 			</section>
 

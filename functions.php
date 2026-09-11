@@ -192,7 +192,7 @@ function mundosmart_enqueue_assets() {
 		'mundosmart-assistencia',
 		get_stylesheet_directory_uri() . '/assets/assistencia.css',
 		array(),
-		'2.8.10'
+		'2.8.11'
 	);
 	wp_enqueue_script(
 		'mundosmart-landing',
@@ -1048,18 +1048,26 @@ function mundosmart_assistencia_markup() {
 }
 
 function mundosmart_brindes_markup() {
-	$whatsapp   = mundosmart_whatsapp_url( 'Olá! Quero personalizados para presente ou brinde.' );
-	$loja       = home_url( '/loja/' );
-	$hero_item  = mundosmart_media_one( 'brindes_hero', 'image' );
-	$photos     = mundosmart_media_list( 'brindes_galeria', 'media', 6 );
+	$whatsapp      = mundosmart_whatsapp_url( 'Olá! Quero personalizados para presente ou brinde.' );
+	$loja          = home_url( '/loja/' );
+	$media_opt     = mundosmart_get_media();
+	$hero_video    = mundosmart_media_one( 'brindes_hero', 'video' );
+	$hero_image    = $hero_video ? null : mundosmart_media_one( 'brindes_hero', 'image' );
+	$photos        = mundosmart_media_list( 'brindes_galeria', 'image', 6 );
 	if ( $photos ) {
 		foreach ( $photos as &$photo ) {
 			$photo['url'] = $loja;
 		}
 		unset( $photo );
 	}
-	if ( $hero_item ) {
-		$hero = $hero_item['src'];
+	if ( $hero_video ) {
+		$hero_video['poster'] = mundosmart_video_poster_url(
+			(int) $hero_video['id'],
+			isset( $media_opt['brindes_hero_capa'] ) ? (int) $media_opt['brindes_hero_capa'] : 0
+		);
+		$hero = '';
+	} elseif ( $hero_image ) {
+		$hero = $hero_image['src'];
 	} else {
 		$hero = $photos ? $photos[0]['src'] : get_stylesheet_directory_uri() . '/assets/brinde-hero.jpg';
 	}
@@ -1080,8 +1088,14 @@ function mundosmart_brindes_markup() {
 						<a class="ms-btn ms-btn--ghost ms-btn--lg" href="<?php echo esc_url( $loja ); ?>">Ver a loja</a>
 					</div>
 				</div>
-				<div class="ms-logo-panel ms-brinde-panel">
+				<div class="ms-logo-panel ms-brinde-panel<?php echo $hero_video ? ' ms-hero-rotator' : ''; ?>"<?php echo $hero_video ? ' data-ms-rotator data-ms-interval="8000" aria-roledescription="vídeo"' : ''; ?>>
+					<?php if ( $hero_video ) : ?>
+					<div class="ms-hero-rotator__slide is-active is-video" data-ms-rotator-slide data-ms-label="Brindes">
+						<?php echo mundosmart_video_markup( $hero_video ); ?>
+					</div>
+					<?php else : ?>
 					<img src="<?php echo esc_url( $hero ); ?>" alt="Copo térmico personalizado Mundo Smart">
+					<?php endif; ?>
 				</div>
 			</div>
 		</section>
@@ -1111,15 +1125,9 @@ function mundosmart_brindes_markup() {
 				<p class="ms-strip__label">Alguns trabalhos</p>
 				<div class="ms-loja-strip">
 					<?php foreach ( $photos as $item ) : ?>
-					<?php if ( ! empty( $item['mime'] ) && 0 === strpos( (string) $item['mime'], 'video/' ) ) : ?>
-					<div class="ms-loja-strip__video">
-						<?php echo mundosmart_video_markup( $item ); ?>
-					</div>
-					<?php else : ?>
 					<a href="<?php echo esc_url( $item['url'] ); ?>">
 						<img src="<?php echo esc_url( $item['src'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" loading="lazy" width="400" height="400">
 					</a>
-					<?php endif; ?>
 					<?php endforeach; ?>
 				</div>
 			</div>

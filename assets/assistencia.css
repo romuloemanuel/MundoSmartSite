@@ -628,7 +628,13 @@ html.ms-zoom-open body {
 	justify-content: center;
 }
 
-.ms-landing--brindes .ms-brinde-panel img {
+.ms-landing--brindes .ms-brinde-panel.ms-hero-rotator {
+	display: block;
+}
+
+.ms-landing--brindes .ms-brinde-panel img,
+.ms-landing--brindes .ms-brinde-panel video,
+.ms-landing--brindes .ms-brinde-panel .ms-video-poster {
 	height: 420px;
 	object-fit: contain;
 	background: transparent;
@@ -1648,9 +1654,12 @@ img.custom-logo {
 		object-fit: cover;
 	}
 
-	.ms-landing--brindes .ms-brinde-panel img {
+	.ms-landing--brindes .ms-brinde-panel img,
+	.ms-landing--brindes .ms-brinde-panel video,
+	.ms-landing--brindes .ms-brinde-panel .ms-video-poster {
 		object-fit: contain;
 		max-height: 280px;
+		height: 280px;
 	}
 
 	.ms-float {
