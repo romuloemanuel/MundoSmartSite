@@ -331,18 +331,13 @@ function mundosmart_media_admin_page() {
 				<h2>Home</h2>
 				<div class="ms-admin-field">
 					<h3>Fachada</h3>
-					<p>Primeira imagem do carrossel principal.</p>
+					<p>Só a foto da loja. Vídeos de conserto não entram aqui — ficam na página Assistência técnica.</p>
 					<?php mundosmart_admin_single( 'home_fachada', $media['home_fachada'], 'image' ); ?>
 				</div>
 				<div class="ms-admin-field">
 					<h3>Fotos do carrossel</h3>
-					<p>Até 5 arquivos só deste carrossel da home (depois da fachada).</p>
-					<?php mundosmart_admin_slots( 'home_fotos', $media['home_fotos'], 'media', 5 ); ?>
-				</div>
-				<div class="ms-admin-field">
-					<h3>Vídeos do carrossel</h3>
-					<p>Até 3 vídeos no painel da home. A foto de capa aparece antes do vídeo iniciar.</p>
-					<?php mundosmart_admin_video_slots( 'home_videos', 'home_videos_capas', $media['home_videos'], $media['home_videos_capas'], 3 ); ?>
+					<p>Até 5 fotos depois da fachada. Vídeo neste bloco é ignorado.</p>
+					<?php mundosmart_admin_slots( 'home_fotos', $media['home_fotos'], 'image', 5 ); ?>
 				</div>
 				<div class="ms-admin-field">
 					<h3>Carrossel: troca e venda</h3>

@@ -841,16 +841,16 @@ function mundosmart_landing_markup( $context = 'home' ) {
 		$fachada_item    = mundosmart_media_one( 'home_fachada', 'image' );
 		$fachada         = $fachada_item ? $fachada_item['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
 		$brindes         = home_url( '/brindes/' );
-		$hero_products = mundosmart_media_list( 'home_fotos', 'media', 5 );
-		if ( $hero_products ) {
-			foreach ( $hero_products as &$hero_item ) {
-				if ( empty( $hero_item['url'] ) ) {
-					$hero_item['url'] = $brindes;
-				}
+		$hero_products = array();
+		foreach ( mundosmart_media_list( 'home_fotos', 'media', 5 ) as $hero_item ) {
+			if ( ! empty( $hero_item['mime'] ) && 0 === strpos( (string) $hero_item['mime'], 'video/' ) ) {
+				continue;
 			}
-			unset( $hero_item );
+			if ( empty( $hero_item['url'] ) ) {
+				$hero_item['url'] = $brindes;
+			}
+			$hero_products[] = $hero_item;
 		}
-		$hero_videos = mundosmart_media_list( 'home_videos', 'media', 3 );
 		?>
 	<main class="ms-landing ms-landing--home">
 		<section class="ms-hero">
@@ -873,23 +873,13 @@ function mundosmart_landing_markup( $context = 'home' ) {
 						<img src="<?php echo esc_url( $fachada ); ?>" alt="Fachada da Mundo Smart" width="800" height="600">
 					</div>
 					<?php foreach ( $hero_products as $item ) : ?>
-					<?php if ( ! empty( $item['mime'] ) && 0 === strpos( (string) $item['mime'], 'video/' ) ) : ?>
-					<div class="ms-hero-rotator__slide is-video" data-ms-rotator-slide data-ms-label="<?php echo esc_attr( 'Vídeo · ' . wp_html_excerpt( $item['title'], 32, '…' ) ); ?>">
-						<?php echo mundosmart_video_markup( $item ); ?>
-					</div>
-					<?php else : ?>
 					<div class="ms-hero-rotator__slide is-product" data-ms-rotator-slide data-ms-label="<?php echo esc_attr( wp_html_excerpt( $item['title'], 42, '…' ) ); ?>">
 						<a href="<?php echo esc_url( $item['url'] ); ?>">
 							<img src="<?php echo esc_url( $item['src'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" loading="lazy" width="400" height="400">
 						</a>
 					</div>
-					<?php endif; ?>
 					<?php endforeach; ?>
-					<?php foreach ( $hero_videos as $video ) : ?>
-					<div class="ms-hero-rotator__slide is-video" data-ms-rotator-slide data-ms-label="<?php echo esc_attr( 'Vídeo · ' . wp_html_excerpt( $video['title'], 32, '…' ) ); ?>">
-						<?php echo mundosmart_video_markup( $video ); ?>
-					</div>
-					<?php endforeach; ?>
+					<?php if ( $hero_products ) : ?>
 					<div class="ms-hero-rotator__nav">
 						<button type="button" class="ms-hero-rotator__btn" data-ms-rotator-prev aria-label="Imagem anterior">
 							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -898,6 +888,7 @@ function mundosmart_landing_markup( $context = 'home' ) {
 							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 						</button>
 					</div>
+					<?php endif; ?>
 				</div>
 			</div>
 		</section>
