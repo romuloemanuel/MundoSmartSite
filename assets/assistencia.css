@@ -696,6 +696,23 @@ html.ms-zoom-open body {
 	text-decoration: underline;
 }
 
+.ms-about-story {
+	max-width: 62ch;
+	color: var(--ms-muted);
+	font-size: 18px;
+	line-height: 1.7;
+}
+
+.ms-about-story p {
+	margin: 0 0 18px;
+}
+
+.ms-about-story .ms-about-tagline {
+	margin-top: 8px;
+	color: var(--ms-text);
+	font-weight: 700;
+}
+
 .ms-hero h1 {
 	font-size: clamp(28px, 5vw, 54px);
 	max-width: min(16ch, 100%);

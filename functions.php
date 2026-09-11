@@ -52,7 +52,151 @@ function mundosmart_ensure_sobre_page() {
 	update_post_meta( (int) $id, '_wp_page_template', 'page-sobre.php' );
 	flush_rewrite_rules( false );
 }
-add_action( 'init', 'mundosmart_ensure_sobre_page', 30 );
+
+function mundosmart_link_sobre_in_elementor( &$elements, $sobre_url, &$changed ) {
+	if ( ! is_array( $elements ) ) {
+		return;
+	}
+	foreach ( $elements as &$element ) {
+		if ( isset( $element['widgetType'] ) && 'icon-list' === $element['widgetType'] && ! empty( $element['settings']['icon_list'] ) && is_array( $element['settings']['icon_list'] ) ) {
+			foreach ( $element['settings']['icon_list'] as &$row ) {
+				$text = isset( $row['text'] ) ? html_entity_decode( (string) $row['text'], ENT_QUOTES, 'UTF-8' ) : '';
+				if ( 'Sobre nós' !== $text && 'Sobre nos' !== $text ) {
+					continue;
+				}
+				$current = isset( $row['link']['url'] ) ? (string) $row['link']['url'] : '';
+				if ( $current && false !== stripos( $current, '/sobre-nos' ) ) {
+					continue;
+				}
+				$row['link'] = array(
+					'url'         => $sobre_url,
+					'is_external' => '',
+					'nofollow'    => '',
+				);
+				$changed++;
+			}
+			unset( $row );
+		}
+		if ( ! empty( $element['elements'] ) && is_array( $element['elements'] ) ) {
+			mundosmart_link_sobre_in_elementor( $element['elements'], $sobre_url, $changed );
+		}
+	}
+	unset( $element );
+}
+
+function mundosmart_ensure_sobre_footer_link() {
+	$sobre_url = home_url( '/sobre-nos/' );
+	if ( get_option( 'mundosmart_sobre_footer_linked' ) === $sobre_url ) {
+		return;
+	}
+	$posts = get_posts(
+		array(
+			'post_type'      => 'elementor-hf',
+			'post_status'    => 'publish',
+			'posts_per_page' => 20,
+		)
+	);
+	$changed_any = false;
+	$found       = false;
+	foreach ( $posts as $post ) {
+		$raw = get_post_meta( $post->ID, '_elementor_data', true );
+		if ( ! is_string( $raw ) || false === stripos( $raw, 'Sobre' ) ) {
+			continue;
+		}
+		$found = true;
+		$data  = json_decode( $raw, true );
+		if ( ! is_array( $data ) ) {
+			continue;
+		}
+		$changed = 0;
+		mundosmart_link_sobre_in_elementor( $data, $sobre_url, $changed );
+		if ( $changed ) {
+			update_post_meta( $post->ID, '_elementor_data', wp_slash( wp_json_encode( $data ) ) );
+			$changed_any = true;
+		}
+	}
+	if ( $changed_any && class_exists( '\Elementor\Plugin' ) ) {
+		\Elementor\Plugin::$instance->files_manager->clear_cache();
+	}
+	if ( $found ) {
+		update_option( 'mundosmart_sobre_footer_linked', $sobre_url, false );
+	}
+}
+
+function mundosmart_ensure_sobre_menu_item() {
+	$page = get_page_by_path( 'sobre-nos' );
+	if ( ! $page ) {
+		return;
+	}
+	$menus = wp_get_nav_menus();
+	if ( ! $menus ) {
+		return;
+	}
+	foreach ( $menus as $menu ) {
+		$items = wp_get_nav_menu_items( $menu->term_id );
+		if ( ! $items ) {
+			continue;
+		}
+		$has      = false;
+		$position = 2;
+		foreach ( $items as $item ) {
+			if ( (int) $item->object_id === (int) $page->ID || false !== stripos( (string) $item->url, '/sobre-nos' ) ) {
+				$has = true;
+			}
+			if ( 'Home' === $item->title ) {
+				$position = (int) $item->menu_order + 1;
+			}
+		}
+		if ( $has ) {
+			continue;
+		}
+		$item_id = wp_update_nav_menu_item(
+			(int) $menu->term_id,
+			0,
+			array(
+				'menu-item-title'     => 'Sobre nós',
+				'menu-item-object-id' => (int) $page->ID,
+				'menu-item-object'    => 'page',
+				'menu-item-type'      => 'post_type',
+				'menu-item-status'    => 'publish',
+				'menu-item-position'  => $position,
+			)
+		);
+		if ( $item_id && ! is_wp_error( $item_id ) ) {
+			$later = wp_get_nav_menu_items( $menu->term_id );
+			if ( $later ) {
+				foreach ( $later as $item ) {
+					if ( (int) $item->ID === (int) $item_id ) {
+						continue;
+					}
+					if ( (int) $item->menu_order >= $position ) {
+						wp_update_post(
+							array(
+								'ID'         => (int) $item->ID,
+								'menu_order' => (int) $item->menu_order + 1,
+							)
+						);
+					}
+				}
+			}
+			wp_update_post(
+				array(
+					'ID'         => (int) $item_id,
+					'menu_order' => $position,
+				)
+			);
+		}
+	}
+	mundosmart_ensure_sobre_footer_link();
+}
+add_action(
+	'init',
+	static function () {
+		mundosmart_ensure_sobre_page();
+		mundosmart_ensure_sobre_menu_item();
+	},
+	30
+);
 
 function mundosmart_google_maps_url() {
 	return 'https://www.google.com/maps/place/Mundo+Smart/@-21.4667958,-47.000261,17z/data=!4m8!3m7!1s0x94b7b97dc3effb9d:0xd915d529063e58ec!8m2!3d-21.4667958!4d-47.000261!9m1!1b1';
@@ -226,7 +370,7 @@ function mundosmart_enqueue_assets() {
 		'mundosmart-assistencia',
 		get_stylesheet_directory_uri() . '/assets/assistencia.css',
 		array(),
-		'2.8.13'
+		'2.8.14'
 	);
 	wp_enqueue_script(
 		'mundosmart-landing',
@@ -1199,7 +1343,7 @@ function mundosmart_sobre_markup() {
 				<div>
 					<p class="ms-kicker">Mundo Smart · Mococa/SP</p>
 					<h1>Sobre <span>nós</span>.</h1>
-					<p class="ms-lead">Somos a loja de celular do centro de Mococa. Atendimento na Rua Quinze de Novembro, 398, em frente à Lojas Cem.</p>
+					<p class="ms-lead">Na Mundo Smart, somos apaixonados por tecnologia e estamos em constante evolução para cuidar do que conecta você ao mundo.</p>
 					<div class="ms-hero__actions">
 						<a class="ms-btn ms-btn--whatsapp ms-btn--lg" href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener">
 							<?php echo mundosmart_whatsapp_icon(); ?>
@@ -1216,8 +1360,13 @@ function mundosmart_sobre_markup() {
 
 		<section class="ms-section">
 			<div class="ms-wrap">
-				<h2>Quem <span>somos</span></h2>
-				<p class="ms-section__intro">A Mundo Smart é uma loja de celular no centro de Mococa. Trabalhamos aqui, no mesmo endereço, com atendimento na loja e pelo WhatsApp.</p>
+				<div class="ms-about-story">
+					<p>Somos uma assistência especializada em Apple, localizada em Mococa, com foco em diagnósticos precisos e reparos avançados em iPhones. Investimos continuamente em conhecimento, equipamentos e técnicas para oferecer soluções com qualidade e atenção a cada detalhe.</p>
+					<p>Sabemos que seu celular faz parte do trabalho, da rotina e dos momentos importantes da sua vida. Por isso, nossa prioridade é deixar seu aparelho o menor tempo possível parado, com agilidade em cada etapa, sem abrir mão do cuidado e dos testes necessários para uma entrega segura.</p>
+					<p>Acreditamos que um bom atendimento começa com confiança. Explicamos o que seu aparelho precisa, apresentamos as opções de reparo e mantemos você informado durante todo o processo, com clareza e proximidade.</p>
+					<p>Além da assistência técnica, oferecemos smartphones, acessórios e personalização para acompanhar seu dia a dia.</p>
+					<p class="ms-about-tagline">Mundo Smart. Paixão por tecnologia, compromisso com você.</p>
+				</div>
 				<div class="ms-about-facts">
 					<article>
 						<b>Endereço</b>
