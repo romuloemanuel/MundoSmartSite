@@ -1255,10 +1255,10 @@ function mundosmart_brindes_markup() {
 						<a class="ms-btn ms-btn--ghost ms-btn--lg" href="<?php echo esc_url( $loja ); ?>">Ver a loja</a>
 					</div>
 				</div>
-				<div class="ms-logo-panel ms-brinde-panel<?php echo $hero_video ? ' ms-hero-rotator' : ''; ?>"<?php echo $hero_video ? ' data-ms-rotator data-ms-interval="8000" aria-roledescription="vídeo"' : ''; ?>>
+				<div class="ms-logo-panel ms-brinde-panel<?php echo $hero_video ? ' ms-hero-rotator' : ''; ?>"<?php echo $hero_video ? ' data-ms-rotator data-ms-play="hover" aria-roledescription="vídeo"' : ''; ?>>
 					<?php if ( $hero_video ) : ?>
 					<div class="ms-hero-rotator__slide is-active is-video" data-ms-rotator-slide data-ms-label="Brindes">
-						<?php echo mundosmart_video_markup( $hero_video ); ?>
+						<?php echo mundosmart_video_markup( $hero_video, true ); ?>
 					</div>
 					<?php else : ?>
 					<img src="<?php echo esc_url( $hero ); ?>" alt="Copo térmico personalizado Mundo Smart">
