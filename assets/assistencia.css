@@ -641,6 +641,49 @@ html.ms-zoom-open body {
 	mix-blend-mode: normal;
 }
 
+.ms-landing--sobre .ms-sobre-panel img {
+	height: 420px;
+	object-fit: cover;
+}
+
+.ms-about-facts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	margin-top: 28px;
+}
+
+.ms-about-facts article {
+	padding: 22px 20px;
+	border: 1px solid var(--ms-line);
+	background: var(--ms-card);
+	border-radius: 18px;
+}
+
+.ms-about-facts b {
+	display: block;
+	margin-bottom: 8px;
+	color: var(--ms-blue-2);
+	font-size: 12px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.ms-about-facts p {
+	margin: 0;
+	color: var(--ms-muted);
+	line-height: 1.55;
+}
+
+.ms-about-facts a {
+	color: var(--ms-blue-2);
+	text-decoration: none;
+}
+
+.ms-about-facts a:hover {
+	text-decoration: underline;
+}
+
 .ms-hero h1 {
 	font-size: clamp(28px, 5vw, 54px);
 	max-width: min(16ch, 100%);
@@ -1549,7 +1592,8 @@ img.custom-logo {
 	.ms-hero__grid,
 	.ms-split,
 	.ms-cta,
-	.ms-paths {
+	.ms-paths,
+	.ms-about-facts {
 		grid-template-columns: minmax(0, 1fr);
 		display: grid;
 	}
