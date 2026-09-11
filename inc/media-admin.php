@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function mundosmart_media_defaults() {
 	return array(
 		'home_fachada'                 => 0,
+		'home_fachada_capa'            => 0,
 		'home_fotos'                   => array( 0, 0, 0, 0, 0 ),
 		'home_videos'                  => array( 0, 0, 0 ),
 		'home_videos_capas'            => array( 0, 0, 0 ),
@@ -331,12 +332,19 @@ function mundosmart_media_admin_page() {
 				<h2>Home</h2>
 				<div class="ms-admin-field">
 					<h3>Fachada</h3>
-					<p>Só a foto da loja. Vídeos de conserto não entram aqui — ficam na página Assistência técnica.</p>
-					<?php mundosmart_admin_single( 'home_fachada', $media['home_fachada'], 'image' ); ?>
+					<p>Primeiro slide: um vídeo com foto de capa. Os outros slides são só imagem. Vídeos de conserto ficam na página Assistência.</p>
+					<div class="ms-admin-slots ms-admin-slots--videos">
+						<div class="ms-admin-video">
+							<div class="ms-admin-video__pair">
+								<?php mundosmart_admin_slot( 'mundosmart_media[home_fachada]', $media['home_fachada'], 'video', 'Escolher vídeo' ); ?>
+								<?php mundosmart_admin_slot( 'mundosmart_media[home_fachada_capa]', $media['home_fachada_capa'], 'image', 'Foto de capa' ); ?>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="ms-admin-field">
 					<h3>Fotos do carrossel</h3>
-					<p>Até 5 fotos depois da fachada. Vídeo neste bloco é ignorado.</p>
+					<p>Até 5 fotos depois do vídeo da fachada. Só imagem.</p>
 					<?php mundosmart_admin_slots( 'home_fotos', $media['home_fotos'], 'image', 5 ); ?>
 				</div>
 				<div class="ms-admin-field">

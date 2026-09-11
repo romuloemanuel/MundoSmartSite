@@ -838,14 +838,19 @@ function mundosmart_landing_markup( $context = 'home' ) {
 	if ( $is_home ) {
 		$whatsapp        = mundosmart_whatsapp_url( 'Olá! Quero falar com a Mundo Smart.' );
 		$whatsapp_iphone = mundosmart_whatsapp_url( 'Olá! Quero comprar ou trocar um iPhone.' );
-		$fachada_item    = mundosmart_media_one( 'home_fachada', 'image' );
-		$fachada         = $fachada_item ? $fachada_item['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
+		$media_opt       = mundosmart_get_media();
+		$fachada_video   = mundosmart_media_one( 'home_fachada', 'video' );
+		$fachada_image   = $fachada_video ? null : mundosmart_media_one( 'home_fachada', 'image' );
+		$fachada         = $fachada_image ? $fachada_image['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
+		if ( $fachada_video ) {
+			$fachada_video['poster'] = mundosmart_video_poster_url(
+				(int) $fachada_video['id'],
+				isset( $media_opt['home_fachada_capa'] ) ? (int) $media_opt['home_fachada_capa'] : 0
+			);
+		}
 		$brindes         = home_url( '/brindes/' );
 		$hero_products = array();
-		foreach ( mundosmart_media_list( 'home_fotos', 'media', 5 ) as $hero_item ) {
-			if ( ! empty( $hero_item['mime'] ) && 0 === strpos( (string) $hero_item['mime'], 'video/' ) ) {
-				continue;
-			}
+		foreach ( mundosmart_media_list( 'home_fotos', 'image', 5 ) as $hero_item ) {
 			if ( empty( $hero_item['url'] ) ) {
 				$hero_item['url'] = $brindes;
 			}
@@ -869,9 +874,15 @@ function mundosmart_landing_markup( $context = 'home' ) {
 					</div>
 				</div>
 				<div class="ms-logo-panel ms-fachada ms-hero-rotator" data-ms-rotator data-ms-interval="5000" aria-roledescription="carrossel">
+					<?php if ( $fachada_video ) : ?>
+					<div class="ms-hero-rotator__slide is-active is-fachada is-video" data-ms-rotator-slide data-ms-label="Fachada">
+						<?php echo mundosmart_video_markup( $fachada_video ); ?>
+					</div>
+					<?php else : ?>
 					<div class="ms-hero-rotator__slide is-active is-fachada" data-ms-rotator-slide data-ms-label="Fachada">
 						<img src="<?php echo esc_url( $fachada ); ?>" alt="Fachada da Mundo Smart" width="800" height="600">
 					</div>
+					<?php endif; ?>
 					<?php foreach ( $hero_products as $item ) : ?>
 					<div class="ms-hero-rotator__slide is-product" data-ms-rotator-slide data-ms-label="<?php echo esc_attr( wp_html_excerpt( $item['title'], 42, '…' ) ); ?>">
 						<a href="<?php echo esc_url( $item['url'] ); ?>">
