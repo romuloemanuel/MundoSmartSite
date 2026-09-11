@@ -105,6 +105,7 @@ function mundosmart_attachment_to_item( $id, $expect = '' ) {
 		if ( ! empty( $img[0] ) ) {
 			$src = $img[0];
 		}
+		$src = mundosmart_fallback_upload_url( $src );
 	}
 	return array(
 		'id'    => $id,

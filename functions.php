@@ -219,14 +219,61 @@ function mundosmart_rewrite_local_url( $url ) {
 	);
 }
 
-add_filter( 'wp_get_attachment_url', 'mundosmart_rewrite_local_url' );
+function mundosmart_theme_midia_url( $filename ) {
+	$filename = basename( rawurldecode( (string) $filename ) );
+	if ( '' === $filename || false !== strpos( $filename, '..' ) ) {
+		return '';
+	}
+	$path = get_stylesheet_directory() . '/assets/midia/' . $filename;
+	if ( ! is_file( $path ) ) {
+		return '';
+	}
+	return get_stylesheet_directory_uri() . '/assets/midia/' . rawurlencode( $filename );
+}
+
+function mundosmart_upload_file_exists( $url ) {
+	$uploads = wp_get_upload_dir();
+	if ( empty( $uploads['baseurl'] ) || 0 !== strpos( (string) $url, $uploads['baseurl'] ) ) {
+		return true;
+	}
+	$file = $uploads['basedir'] . substr( (string) $url, strlen( $uploads['baseurl'] ) );
+	return is_file( $file );
+}
+
+function mundosmart_fallback_upload_url( $url ) {
+	if ( ! is_string( $url ) || '' === $url ) {
+		return $url;
+	}
+	$url = mundosmart_rewrite_local_url( $url );
+	if ( mundosmart_upload_file_exists( $url ) ) {
+		return $url;
+	}
+	$base = basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	if ( '' === $base ) {
+		return $url;
+	}
+	$theme = mundosmart_theme_midia_url( $base );
+	if ( $theme ) {
+		return $theme;
+	}
+	$orig = preg_replace( '/-\d+x\d+(?=\.[a-z0-9]+$)/i', '', $base );
+	if ( $orig && $orig !== $base ) {
+		$theme = mundosmart_theme_midia_url( $orig );
+		if ( $theme ) {
+			return $theme;
+		}
+	}
+	return $url;
+}
+
+add_filter( 'wp_get_attachment_url', 'mundosmart_fallback_upload_url' );
 add_filter( 'style_loader_src', 'mundosmart_rewrite_local_url' );
 add_filter( 'script_loader_src', 'mundosmart_rewrite_local_url' );
 add_filter(
 	'wp_get_attachment_image_src',
 	static function ( $image ) {
 		if ( is_array( $image ) && ! empty( $image[0] ) ) {
-			$image[0] = mundosmart_rewrite_local_url( $image[0] );
+			$image[0] = mundosmart_fallback_upload_url( $image[0] );
 		}
 		return $image;
 	}
@@ -239,7 +286,7 @@ add_filter(
 		}
 		foreach ( $sources as &$source ) {
 			if ( ! empty( $source['url'] ) ) {
-				$source['url'] = mundosmart_rewrite_local_url( $source['url'] );
+				$source['url'] = mundosmart_fallback_upload_url( $source['url'] );
 			}
 		}
 		return $sources;
@@ -763,7 +810,8 @@ function mundosmart_force_logo_png( $image, $attachment_id ) {
 	if ( (int) $attachment_id !== 991 || ! is_array( $image ) ) {
 		return $image;
 	}
-	$image[0] = content_url( 'uploads/2026/09/logo-mundo-smart.png' );
+	$theme = mundosmart_theme_midia_url( 'logo-mundo-smart.png' );
+	$image[0] = $theme ? $theme : mundosmart_fallback_upload_url( content_url( 'uploads/2026/09/logo-mundo-smart.png' ) );
 	return $image;
 }
 add_filter( 'wp_get_attachment_image_src', 'mundosmart_force_logo_png', 20, 2 );
