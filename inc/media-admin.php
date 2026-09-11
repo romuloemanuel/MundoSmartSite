@@ -76,7 +76,6 @@ function mundosmart_get_media() {
 			$out[ $key ] = (int) $saved[ $key ];
 		}
 	}
-	mundosmart_split_legacy_hero_video( $out, 'home_fachada', 'home_fachada_video' );
 	mundosmart_split_legacy_hero_video( $out, 'brindes_hero', 'brindes_hero_video' );
 	return $out;
 }
@@ -94,23 +93,65 @@ function mundosmart_split_legacy_hero_video( &$out, $image_key, $video_key ) {
 	}
 }
 
+function mundosmart_hero_foreign_video_ids( $media, $video_key ) {
+	$keys = array(
+		'home_videos',
+		'home_troca',
+		'home_assistencia_fotos',
+		'home_loja',
+		'assistencia_iphone',
+		'assistencia_android',
+		'assistencia_avancados',
+		'brindes_galeria',
+	);
+	if ( 'home_fachada_video' === $video_key ) {
+		$keys[] = 'brindes_hero_video';
+	}
+	if ( 'brindes_hero_video' === $video_key ) {
+		$keys[] = 'home_fachada_video';
+	}
+	$ids = array();
+	foreach ( $keys as $key ) {
+		if ( ! isset( $media[ $key ] ) ) {
+			continue;
+		}
+		foreach ( (array) $media[ $key ] as $id ) {
+			$id = (int) $id;
+			if ( $id > 0 ) {
+				$ids[ $id ] = true;
+			}
+		}
+	}
+	return $ids;
+}
+
 function mundosmart_hero_video_or_image( $image_key, $video_key, $capa_key ) {
-	$media = mundosmart_get_media();
-	$video = mundosmart_media_one( $video_key, 'video' );
+	$media    = mundosmart_get_media();
+	$video_id = isset( $media[ $video_key ] ) ? (int) $media[ $video_key ] : 0;
+	$foreign  = mundosmart_hero_foreign_video_ids( $media, $video_key );
+	if ( $video_id && isset( $foreign[ $video_id ] ) ) {
+		$video_id = 0;
+	}
+	$video = $video_id ? mundosmart_attachment_to_item( $video_id, 'video' ) : null;
+	$image = mundosmart_media_one( $image_key, 'image' );
 	if ( $video ) {
-		$video['poster'] = mundosmart_video_poster_url(
-			(int) $video['id'],
-			isset( $media[ $capa_key ] ) ? (int) $media[ $capa_key ] : 0
-		);
+		$capa_id = isset( $media[ $capa_key ] ) ? (int) $media[ $capa_key ] : 0;
+		$poster  = '';
+		if ( $capa_id > 0 ) {
+			$poster = mundosmart_video_poster_url( $video_id, $capa_id );
+		}
+		if ( ! $poster && $image && ! empty( $image['src'] ) ) {
+			$poster = $image['src'];
+		}
+		$video['poster'] = $poster;
 		return array(
 			'video' => $video,
-			'src'   => '',
+			'src'   => $image && ! empty( $image['src'] ) ? $image['src'] : '',
 		);
 	}
-	$image = mundosmart_media_one( $image_key, 'image' );
 	return array(
 		'video' => null,
-		'src'   => $image ? $image['src'] : '',
+		'src'   => $image && ! empty( $image['src'] ) ? $image['src'] : '',
 	);
 }
 
@@ -370,7 +411,7 @@ function mundosmart_media_admin_page() {
 				<h2>Home</h2>
 				<div class="ms-admin-field">
 					<h3>Fachada</h3>
-					<p>Sem vídeo, aparece só a foto. Quando houver vídeo com capa, o vídeo entra no lugar da foto. Os outros slides são só imagem.</p>
+					<p>Sem vídeo, aparece só a foto da loja. O vídeo da fachada tem que ser o da loja — vídeos de conserto ficam só em Assistência.</p>
 					<?php mundosmart_admin_single( 'home_fachada', $media['home_fachada'], 'image' ); ?>
 					<div class="ms-admin-slots ms-admin-slots--videos">
 						<div class="ms-admin-video">
