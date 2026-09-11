@@ -838,16 +838,9 @@ function mundosmart_landing_markup( $context = 'home' ) {
 	if ( $is_home ) {
 		$whatsapp        = mundosmart_whatsapp_url( 'Olá! Quero falar com a Mundo Smart.' );
 		$whatsapp_iphone = mundosmart_whatsapp_url( 'Olá! Quero comprar ou trocar um iPhone.' );
-		$media_opt       = mundosmart_get_media();
-		$fachada_video   = mundosmart_media_one( 'home_fachada', 'video' );
-		$fachada_image   = $fachada_video ? null : mundosmart_media_one( 'home_fachada', 'image' );
-		$fachada         = $fachada_image ? $fachada_image['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
-		if ( $fachada_video ) {
-			$fachada_video['poster'] = mundosmart_video_poster_url(
-				(int) $fachada_video['id'],
-				isset( $media_opt['home_fachada_capa'] ) ? (int) $media_opt['home_fachada_capa'] : 0
-			);
-		}
+		$fachada_hero    = mundosmart_hero_video_or_image( 'home_fachada', 'home_fachada_video', 'home_fachada_capa' );
+		$fachada_video   = $fachada_hero['video'];
+		$fachada         = $fachada_hero['src'] ? $fachada_hero['src'] : get_stylesheet_directory_uri() . '/assets/fachada.jpg?v=3';
 		$brindes         = home_url( '/brindes/' );
 		$hero_products = array();
 		foreach ( mundosmart_media_list( 'home_fotos', 'image', 5 ) as $hero_item ) {
@@ -1050,9 +1043,8 @@ function mundosmart_assistencia_markup() {
 function mundosmart_brindes_markup() {
 	$whatsapp      = mundosmart_whatsapp_url( 'Olá! Quero personalizados para presente ou brinde.' );
 	$loja          = home_url( '/loja/' );
-	$media_opt     = mundosmart_get_media();
-	$hero_video    = mundosmart_media_one( 'brindes_hero', 'video' );
-	$hero_image    = $hero_video ? null : mundosmart_media_one( 'brindes_hero', 'image' );
+	$hero_media    = mundosmart_hero_video_or_image( 'brindes_hero', 'brindes_hero_video', 'brindes_hero_capa' );
+	$hero_video    = $hero_media['video'];
 	$photos        = mundosmart_media_list( 'brindes_galeria', 'image', 6 );
 	if ( $photos ) {
 		foreach ( $photos as &$photo ) {
@@ -1061,13 +1053,9 @@ function mundosmart_brindes_markup() {
 		unset( $photo );
 	}
 	if ( $hero_video ) {
-		$hero_video['poster'] = mundosmart_video_poster_url(
-			(int) $hero_video['id'],
-			isset( $media_opt['brindes_hero_capa'] ) ? (int) $media_opt['brindes_hero_capa'] : 0
-		);
 		$hero = '';
-	} elseif ( $hero_image ) {
-		$hero = $hero_image['src'];
+	} elseif ( $hero_media['src'] ) {
+		$hero = $hero_media['src'];
 	} else {
 		$hero = $photos ? $photos[0]['src'] : get_stylesheet_directory_uri() . '/assets/brinde-hero.jpg';
 	}

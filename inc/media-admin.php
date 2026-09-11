@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function mundosmart_media_defaults() {
 	return array(
 		'home_fachada'                 => 0,
+		'home_fachada_video'           => 0,
 		'home_fachada_capa'            => 0,
 		'home_fotos'                   => array( 0, 0, 0, 0, 0 ),
 		'home_videos'                  => array( 0, 0, 0 ),
@@ -26,6 +27,7 @@ function mundosmart_media_defaults() {
 		'assistencia_avancados'        => array( 0, 0, 0 ),
 		'assistencia_avancados_capas'  => array( 0, 0, 0 ),
 		'brindes_hero'                 => 0,
+		'brindes_hero_video'           => 0,
 		'brindes_hero_capa'            => 0,
 		'brindes_galeria'              => array( 0, 0, 0, 0, 0, 0 ),
 	);
@@ -74,7 +76,42 @@ function mundosmart_get_media() {
 			$out[ $key ] = (int) $saved[ $key ];
 		}
 	}
+	mundosmart_split_legacy_hero_video( $out, 'home_fachada', 'home_fachada_video' );
+	mundosmart_split_legacy_hero_video( $out, 'brindes_hero', 'brindes_hero_video' );
 	return $out;
+}
+
+function mundosmart_split_legacy_hero_video( &$out, $image_key, $video_key ) {
+	$image_id = isset( $out[ $image_key ] ) ? (int) $out[ $image_key ] : 0;
+	$video_id = isset( $out[ $video_key ] ) ? (int) $out[ $video_key ] : 0;
+	if ( $video_id || $image_id <= 0 ) {
+		return;
+	}
+	$post = get_post( $image_id );
+	if ( $post && 'attachment' === $post->post_type && 0 === strpos( (string) $post->post_mime_type, 'video/' ) ) {
+		$out[ $video_key ] = $image_id;
+		$out[ $image_key ] = 0;
+	}
+}
+
+function mundosmart_hero_video_or_image( $image_key, $video_key, $capa_key ) {
+	$media = mundosmart_get_media();
+	$video = mundosmart_media_one( $video_key, 'video' );
+	if ( $video ) {
+		$video['poster'] = mundosmart_video_poster_url(
+			(int) $video['id'],
+			isset( $media[ $capa_key ] ) ? (int) $media[ $capa_key ] : 0
+		);
+		return array(
+			'video' => $video,
+			'src'   => '',
+		);
+	}
+	$image = mundosmart_media_one( $image_key, 'image' );
+	return array(
+		'video' => null,
+		'src'   => $image ? $image['src'] : '',
+	);
 }
 
 function mundosmart_attachment_to_item( $id, $expect = '' ) {
@@ -333,11 +370,13 @@ function mundosmart_media_admin_page() {
 				<h2>Home</h2>
 				<div class="ms-admin-field">
 					<h3>Fachada</h3>
-					<p>Primeiro slide: um vídeo com foto de capa. Os outros slides são só imagem. Vídeos de conserto ficam na página Assistência.</p>
+					<p>Sem vídeo, aparece só a foto. Quando houver vídeo com capa, o vídeo entra no lugar da foto. Os outros slides são só imagem.</p>
+					<?php mundosmart_admin_single( 'home_fachada', $media['home_fachada'], 'image' ); ?>
 					<div class="ms-admin-slots ms-admin-slots--videos">
 						<div class="ms-admin-video">
+							<p class="ms-admin-video__title">Vídeo (opcional)</p>
 							<div class="ms-admin-video__pair">
-								<?php mundosmart_admin_slot( 'mundosmart_media[home_fachada]', $media['home_fachada'], 'video', 'Escolher vídeo' ); ?>
+								<?php mundosmart_admin_slot( 'mundosmart_media[home_fachada_video]', $media['home_fachada_video'], 'video', 'Escolher vídeo' ); ?>
 								<?php mundosmart_admin_slot( 'mundosmart_media[home_fachada_capa]', $media['home_fachada_capa'], 'image', 'Foto de capa' ); ?>
 							</div>
 						</div>
@@ -345,7 +384,7 @@ function mundosmart_media_admin_page() {
 				</div>
 				<div class="ms-admin-field">
 					<h3>Fotos do carrossel</h3>
-					<p>Até 5 fotos depois do vídeo da fachada. Só imagem.</p>
+					<p>Até 5 fotos depois da fachada. Só imagem.</p>
 					<?php mundosmart_admin_slots( 'home_fotos', $media['home_fotos'], 'image', 5 ); ?>
 				</div>
 				<div class="ms-admin-field">
@@ -395,11 +434,13 @@ function mundosmart_media_admin_page() {
 				<h2>Brindes</h2>
 				<div class="ms-admin-field">
 					<h3>Imagem principal</h3>
-					<p>Primeiro: um vídeo com foto de capa. Os trabalhos abaixo são só imagem.</p>
+					<p>Sem vídeo, aparece só a foto. Quando houver vídeo com capa, o vídeo entra no lugar da foto.</p>
+					<?php mundosmart_admin_single( 'brindes_hero', $media['brindes_hero'], 'image' ); ?>
 					<div class="ms-admin-slots ms-admin-slots--videos">
 						<div class="ms-admin-video">
+							<p class="ms-admin-video__title">Vídeo (opcional)</p>
 							<div class="ms-admin-video__pair">
-								<?php mundosmart_admin_slot( 'mundosmart_media[brindes_hero]', $media['brindes_hero'], 'video', 'Escolher vídeo' ); ?>
+								<?php mundosmart_admin_slot( 'mundosmart_media[brindes_hero_video]', $media['brindes_hero_video'], 'video', 'Escolher vídeo' ); ?>
 								<?php mundosmart_admin_slot( 'mundosmart_media[brindes_hero_capa]', $media['brindes_hero_capa'], 'image', 'Foto de capa' ); ?>
 							</div>
 						</div>
